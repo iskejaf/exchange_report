@@ -86,7 +86,6 @@
             align-items: center;
             /* Esto centra el texto dentro del botón */
             flex-grow: 1;
-
             /* Estilos para borde azul y texto azul por defecto */
             background-color: transparent;
             color: #007bff;
@@ -387,6 +386,20 @@
             /* Texto blanco al hover */
             border-color: #28a745;
         }
+
+        /* >>> NUEVO: Estilos para el mensaje de inconsistencia <<< */
+        .inconsistency-error {
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #dc3545;
+            /* Rojo de Bootstrap para error */
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
+        .inconsistency-error:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -397,6 +410,8 @@
                 <div class="col-md-3 input-column">
                     <div class="file-upload-controls">
                         <div class="button-row-container">
+
+
                             <div class="button-and-status">
                                 <input type="file" id="fileInputPacto" accept=".xls,.xlsx" style="display: none;">
                                 <label for="fileInputPacto" class="btn btn-primary"
@@ -404,70 +419,108 @@
                                 <span id="filesLoadedPactoCount" class="pactadas-count-display">0</span>
                             </div>
 
+
+
                             <div class="button-and-status">
                                 <input type="file" id="fileInputNoPactadas" accept=".xls,.xlsx" style="display: none;">
                                 <label for="fileInputNoPactadas" class="btn btn-primary" data-file-type="no_pactadas">No
+
+
                                     Pactadas</label>
                                 <i id="statusIconNoPactadas" class="fas fa-times-circle file-upload-status"></i>
                             </div>
+
+
                         </div>
                         <div class="form-group">
                             <input type="text" id="searchInput" class="form-control" placeholder="Buscar...">
+
+
                         </div>
                     </div>
                 </div>
 
                 <div class="col-md-9">
                     <div class="row g-2">
+
+
                         <div class="col">
                             <div class="metric-box">
                                 <span class="metric-title">Fecha Valor:</span>
                                 <span class="metric-value" id="fechaValorDisplay">--/--/----</span>
+
+
                             </div>
                         </div>
                         <div class="col">
+
+
                             <div class="metric-box">
                                 <span class="metric-title">Monto Total USD:</span>
                                 <span class="metric-value" id="totalMontoUSD">0,00</span>
+
+
                             </div>
                         </div>
                         <div class="col">
                             <div class="metric-box">
+
+
                                 <span class="metric-title">Tasa de Compra:</span>
                                 <span class="metric-value" id="tasaCompraDisplay">0,0000</span>
                             </div>
+
+
                         </div>
                         <div class="col">
                             <div class="metric-box">
                                 <span class="metric-title">Tasa Mínima:</span>
+
+
                                 <span class="metric-value" id="tasaMinimaDisplay">0,0000</span>
                             </div>
                         </div>
                     </div>
+
+
                     <div class="row g-2">
                         <div class="col">
                             <div class="metric-box">
+
+
                                 <span class="metric-title">Tipo de Cambio:</span>
                                 <span class="metric-value" id="tipoCambioPromedioDisplay">0,0000</span>
                             </div>
                         </div>
+
+
                         <div class="col">
                             <div class="metric-box">
                                 <span class="metric-title">Contravalor Bs.:</span>
+
+
                                 <span class="metric-value" id="totalContravalorBsDisplay">0,00</span>
                             </div>
                         </div>
                         <div class="col">
+
+
                             <div class="metric-box">
                                 <span class="metric-title">Tasa de Venta:</span>
                                 <span class="metric-value" id="tasaVentaDisplay">0,0000</span>
+
+
                             </div>
                         </div>
                         <div class="col">
                             <div class="metric-box">
+
+
                                 <span class="metric-title">Tasa Máxima:</span>
                                 <span class="metric-value" id="tasaMaximaDisplay">0,0000</span>
                             </div>
+
+
                         </div>
                     </div>
                 </div>
@@ -476,11 +529,15 @@
 
         <div id="excelTableContainer" class="table-responsive hidden">
             <table id="editableExcelTable" class="table table-bordered table-hover">
+
+
             </table>
         </div>
 
         <div class="footer-controls hidden">
-            <span class="operations-count">Cant. Operaciones: <span id="visibleRowCount">0</span></span>
+            <span class="operations-count">Cant.
+                Operaciones: <span id="visibleRowCount">0</span></span>
+            <span id="instrumentPactInconsistency" class="inconsistency-error hidden"></span>
             <button id="exportModifiedExcel" class="btn btn-success"><i class="fas fa-file-excel"></i> Exportar a
                 Excel</button>
         </div>
@@ -492,6 +549,8 @@
     <script>
         $(document).ready(function () {
             // Referencias a los elementos del DOM para el archivo Pacto
+
+
             const fileInputPacto = $('#fileInputPacto');
             const filesLoadedPactoCount = $('#filesLoadedPactoCount'); // Nuevo elemento para el contador de Pactadas
 
@@ -500,12 +559,13 @@
             const statusIconNoPactadas = $('#statusIconNoPactadas');
 
 
-            const excelTableContainer = $('#excelTableContainer');
+            const
+
+                excelTableContainer = $('#excelTableContainer');
             const editableExcelTable = $('#editableExcelTable');
             const exportButton = $('#exportModifiedExcel');
             const searchInput = $('#searchInput');
             const footerControls = $('.footer-controls');
-
             // Metric display elements
             const fechaValorDisplay = $('#fechaValorDisplay');
             const totalMontoUSDSpan = $('#totalMontoUSD');
@@ -518,25 +578,37 @@
             const tasaMaximaDisplay = $('#tasaMaximaDisplay');
 
             const visibleRowCountSpan = $('#visibleRowCount');
+            // >>> NUEVO: Referencia al elemento del mensaje de inconsistencia <<<
+            const inconsistencyWarning = $('#instrumentPactInconsistency');
 
-            let workbookData = null; // Para el archivo de Pacto
-            let currentTableData = null; // Para los datos mostrados en la tabla (del archivo Pacto)
-            let ofertaWorkbookData = null; // Para el nuevo archivo de No Pactadas
-            let pactoFilesLoadedCount = 0; // Variable para contar los archivos de Pacto cargados
+
+            let workbookData = null;
+            // Para el archivo de Pacto
+            let currentTableData = null;
+            // Para los datos mostrados en la tabla (del archivo Pacto)
+            let ofertaWorkbookData = null;
+            // Para el nuevo archivo de No Pactadas
+            let pactoFilesLoadedCount = 0;
+            // Variable para contar los archivos de Pacto cargados
+            // >>> NUEVO: Array para almacenar los índices de las filas con inconsistencias <<<
+            let inconsistentRows = [];
 
             const HTML_TABLE_AND_PACTO_HEADERS = [
                 "Fecha Jornada", "Fecha Pacto", "Hora Pacto", "Código Moneda Divisa",
                 "Monto Divisa", "Monto USD", "Tipo de Cambio Bs./USD", "Contravalor Bs.",
                 "Instrumento", "Tipo de Pacto",
+
+
                 "Código Operador", "Nombre Operador", "RIF/CI", "Cliente", "Cuenta Moneda Nacional", "Cuenta Moneda Extranjera (Opcional)",
                 "Código Operador", "Nombre Operador", "RIF/CI", "Cliente", "Cuenta Moneda Nacional", "Cuenta Moneda Extranjera (Opcional)"
             ];
-
             const NO_PACTADAS_OUTPUT_HEADERS = [
                 "Fecha Jornada", "Fecha Registro", "Hora Registro", "Código Moneda Divisa",
                 "Monto Divisa", "Monto USD", "Tipo de Cambio Bs./USD", "Contravalor Bs.",
                 "Instrumento", "Código Operador", "Nombre Operador", "RIF/CI",
                 "Cliente", "Cuenta Moneda Nacional", "Cuenta Moneda Extranjera (Opcional)"
+
+
             ];
 
 
@@ -544,11 +616,11 @@
             const montoUSDIndex = HTML_TABLE_AND_PACTO_HEADERS.indexOf("Monto USD");
             const tipoCambioBsUSDIndex = HTML_TABLE_AND_PACTO_HEADERS.indexOf("Tipo de Cambio Bs./USD");
             const contravalorBsIndex = HTML_TABLE_AND_PACTO_HEADERS.indexOf("Contravalor Bs.");
-
             // Inicializa currentTableData SOLO CON LAS CABECERAS al cargar la página
             currentTableData = [HTML_TABLE_AND_PACTO_HEADERS];
             renderTable(currentTableData); // Renderiza la tabla vacía con encabezados
-            updateSummaryMetrics(); // Actualiza las métricas iniciales
+            updateSummaryMetrics();
+            // Actualiza las métricas iniciales
 
             // Ocultar el footer y la tabla al inicio
             excelTableContainer.addClass('hidden');
@@ -576,7 +648,6 @@
                 console.log("handleFileUpload se ha ejecutado.");
                 const file = fileObject;
                 const statusIconElem = isPactoFile ? null : statusIconNoPactadas;
-
                 // Reset visual status for "No Pactadas"
                 if (!isPactoFile) {
                     statusIconElem.removeClass('fa-check-circle loaded').addClass('fa-times-circle').css('color', '');
@@ -595,7 +666,8 @@
                             footerControls.addClass('hidden');
                         }
                     } else {
-                        ofertaWorkbookData = null; // Reinicia los datos de No Pactadas
+                        ofertaWorkbookData = null;
+                        // Reinicia los datos de No Pactadas
                         statusIconNoPactadas.removeClass('fa-check-circle loaded').addClass('fa-times-circle');
                     }
                     updateSummaryMetrics();
@@ -607,7 +679,6 @@
                     const data = new Uint8Array(e.target.result);
                     try {
                         const workbook = XLSX.read(data, { type: 'array', cellDates: true, dateNF: 'yyyy-mm-dd HH:mm:ss' });
-
                         console.log("Workbook leído:", workbook);
 
                         if (isPactoFile) {
@@ -615,7 +686,6 @@
                             const firstSheetName = workbook.SheetNames[0];
                             const worksheet = workbook.Sheets[firstSheetName];
                             const startingExcelRowIndex = 3;
-
                             if (!worksheet || !worksheet['!ref']) {
                                 alert('La primera hoja del archivo Excel está vacía o no tiene un rango definido.');
                                 if (pactoFilesLoadedCount === 0) {
@@ -633,31 +703,40 @@
                             const adjustedRange = {
                                 s: { r: startingExcelRowIndex, c: fullRange.s.c },
                                 e: { r: fullRange.e.r, c: fullRange.e.c }
+
+
                             };
                             const rawData = XLSX.utils.sheet_to_json(worksheet, {
                                 header: 1,
                                 range: adjustedRange,
+
+
                                 defval: "",
                                 raw: false,
                                 dateNF: 'yyyy-mm-dd HH:mm:ss'
+
+
                             });
 
                             console.log("Raw data from Excel (starting from row 4):", rawData);
-
                             // Define el índice de la columna "Contravalor Bs." en tu Excel original
-                            // Si la columna "Contravalor Bs." es la G, su índice es 6 (A=0, B=1, C=2, D=3, E=4, F=5, G=6)
+                            // Si la columna "Contravalor Bs."
+                            // es la G, su índice es 6 (A=0, B=1, C=2, D=3, E=4, F=5, G=6)
                             // ¡AJUSTA ESTE ÍNDICE SEGÚN TU EXCEL!
                             const EXCEL_CONTRAVALOR_BS_COLUMN_INDEX = 6; // Por ejemplo, si es la columna G en tu Excel
 
                             const processedRawData = rawData.map(excelRow => {
                                 const newExcelRow = [...excelRow]; // Copia la fila
+
+
                                 // Elimina la columna de Contravalor Bs. si existe
                                 if (EXCEL_CONTRAVALOR_BS_COLUMN_INDEX >= 0 && EXCEL_CONTRAVALOR_BS_COLUMN_INDEX < newExcelRow.length) {
+
+
                                     newExcelRow.splice(EXCEL_CONTRAVALOR_BS_COLUMN_INDEX, 1);
                                 }
                                 return newExcelRow;
                             });
-
                             if (processedRawData.length > 0) {
                                 const today = new Date();
                                 const todayFormatted = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
@@ -668,33 +747,58 @@
                                 const PROCESSED_EXCEL_COLUMN_MAP = {
                                     "Fecha Pacto": 0,
                                     "Hora Pacto": 1,
+
+
                                     "Código Moneda Divisa": 2,
                                     "Monto Divisa": 3,
                                     "Monto USD": 4,
+
+
                                     "Tipo de Cambio Bs./USD": 5,
                                     "Instrumento": 6, // Este es el índice después de eliminar Contravalor Bs.
                                     "Tipo de Pacto": 7,
                                     "Código Operador Oferta": 8,
                                     "Nombre Operador Oferta": 9,
+
+
                                     "RIF/CI Oferta": 10,
                                     "Cliente Oferta": 11,
                                     "Cuenta Moneda Nacional Oferta": 12,
+
+
                                     "Cuenta Moneda Extranjera (Opcional) Oferta": 13,
                                     "Código Operador Demanda": 14,
+
+
                                     "Nombre Operador Demanda": 15,
                                     "RIF/CI Demanda": 16,
                                     "Cliente Demanda": 17,
+
+
                                     "Cuenta Moneda Nacional Demanda": 18,
                                     "Cuenta Moneda Extranjera (Opcional) Demanda": 19
+
+
                                 };
+
+                                // COMENTARIO: Se definen los índices de las columnas de la tabla HTML para usarlos en las validaciones.
+                                const tipoPactoIndexHtml = HTML_TABLE_AND_PACTO_HEADERS.indexOf("Tipo de Pacto");
+                                const rifCiOfertaIndexHtml = HTML_TABLE_AND_PACTO_HEADERS.indexOf("RIF/CI");
+                                const clienteOfertaIndexHtml = HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cliente");
+                                const rifCiDemandaIndexHtml = HTML_TABLE_AND_PACTO_HEADERS.lastIndexOf("RIF/CI");
+                                const clienteDemandaIndexHtml = HTML_TABLE_AND_PACTO_HEADERS.lastIndexOf("Cliente");
 
 
                                 processedRawData.forEach(excelRowFiltered => {
                                     if (excelRowFiltered && excelRowFiltered.length > 0 && excelRowFiltered.some(cell => cell !== null && String(cell).trim() !== '')) {
-                                        const newRow = new Array(HTML_TABLE_AND_PACTO_HEADERS.length).fill(null);
+
+                                        const newRow
+                                            = new Array(HTML_TABLE_AND_PACTO_HEADERS.length).fill(null);
                                         newRow[fechaJornadaIndex] = todayFormatted;
 
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("Fecha Pacto")] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Fecha Pacto"]] ? new Date(excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Fecha Pacto"]]).toISOString().split('T')[0] : '';
+
+
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("Hora Pacto")] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Hora Pacto"]] ? String(excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Hora Pacto"]]) : '';
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("Código Moneda Divisa")] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Código Moneda Divisa"]];
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("Monto Divisa")] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Monto Divisa"]];
@@ -711,15 +815,30 @@
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cliente")] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Cliente Oferta"]];
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cuenta Moneda Nacional")] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Cuenta Moneda Nacional Oferta"]];
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cuenta Moneda Extranjera (Opcional)")] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Cuenta Moneda Extranjera (Opcional) Oferta"]];
-
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("Código Operador", HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cuenta Moneda Extranjera (Opcional)") + 1)] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Código Operador Demanda"]];
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("Nombre Operador", HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cuenta Moneda Extranjera (Opcional)") + 1)] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Nombre Operador Demanda"]];
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("RIF/CI", HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cuenta Moneda Extranjera (Opcional)") + 1)] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["RIF/CI Demanda"]];
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cliente", HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cuenta Moneda Extranjera (Opcional)") + 1)] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Cliente Demanda"]];
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cuenta Moneda Nacional", HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cuenta Moneda Extranjera (Opcional)") + 1)] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Cuenta Moneda Nacional Demanda"]];
                                         newRow[HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cuenta Moneda Extranjera (Opcional)", HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cuenta Moneda Extranjera (Opcional)") + 1)] = excelRowFiltered[PROCESSED_EXCEL_COLUMN_MAP["Cuenta Moneda Extranjera (Opcional) Demanda"]];
+                                        // AJUSTE: INICIO - Se aplican validaciones a la fila antes de ser añadida a la tabla.
+                                        const rifOferta = newRow[rifCiOfertaIndexHtml];
+                                        const rifDemanda = newRow[rifCiDemandaIndexHtml];
 
+                                        // Validación 1: Si el RIF es J085371427, se actualiza el nombre del cliente.
+                                        if (rifOferta === 'J085371427') {
+                                            newRow[clienteOfertaIndexHtml] = 'CASA DE CAMBIO ZOOM C.A.';
+                                        }
+                                        if (rifDemanda === 'J085371427') {
+                                            newRow[clienteDemandaIndexHtml] = 'CASA DE CAMBIO ZOOM C.A.';
+                                        }
 
+                                        // Validación 2: Si ambos RIFs son J309841327, se actualiza el cliente y el tipo de pacto.
+                                        if (rifOferta === 'J309841327' && rifDemanda === 'J309841327') {
+                                            newRow[clienteOfertaIndexHtml] = 'FIDEICOMISO BANCO NACIONAL DE CREDITO';
+                                            newRow[tipoPactoIndexHtml] = 'FIDOCA';
+                                        }
+                                        // AJUSTE: FIN - Fin de las validaciones.
                                         const montoUSD = parseVenezuelanNumber(newRow[montoUSDIndex]);
                                         const tipoCambio = parseVenezuelanNumber(newRow[tipoCambioBsUSDIndex]);
 
@@ -812,32 +931,38 @@
 
                 if (selectedFile) {
                     handleFileUpload(selectedFile, true);
+
+
                 } else {
                     console.log("No file selected for Pacto.");
                     // Si no se selecciona archivo, y no hay datos previos, resetear la tabla
                     if (pactoFilesLoadedCount === 0) {
+
+
                         currentTableData = [HTML_TABLE_AND_PACTO_HEADERS];
                         renderTable(currentTableData);
                         excelTableContainer.addClass('hidden');
                         footerControls.addClass('hidden');
+
+
                     }
                     updateSummaryMetrics();
                 }
             });
-
             fileInputNoPactadas.on('change', function (e) {
                 console.log("Evento change de fileInputNoPactadas disparado.");
                 const selectedFile = e.target.files ? e.target.files[0] : null;
 
                 if (selectedFile) {
                     handleFileUpload(selectedFile, false);
+
+
                 } else {
                     console.log("No file selected for No Pactadas.");
                     statusIconNoPactadas.removeClass('fa-check-circle loaded').addClass('fa-times-circle');
                     ofertaWorkbookData = null;
                 }
             });
-
             function renderTable(data) {
                 let tableHtml = '<thead><tr>';
                 tableHtml += '<th></th>'; // Columna para el botón de eliminar
@@ -850,32 +975,43 @@
                 for (let i = 1; i < data.length; i++) {
                     tableHtml += '<tr>';
                     // Aquí se inserta el SVG directamente en el botón
-                    tableHtml += `<td><button class="delete-row-btn" data-row-index="${i - 1}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg></button></td>`;
+                    tableHtml += `<td><button class="delete-row-btn" data-row-index="${i - 1}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 
+1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/></svg></button></td>`;
                     data[i].forEach((cellData, colIndex) => {
                         let displayData = cellData !== undefined && cellData !== null ? cellData : '';
 
                         let formattedValue = displayData;
                         let numericValue = parseVenezuelanNumber(displayData);
 
+
+
                         if (numericValue !== null && typeof numericValue === 'number') {
                             switch (colIndex) {
                                 case 4: // Monto Divisa
+
+
                                 case 5: // Monto USD
                                 case 7: // Contravalor Bs. (que será nuestro calculado)
+
+
                                     formattedValue = numericValue.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                                     break;
                                 case 6: // Tipo de Cambio Bs./USD
+
+
                                     formattedValue = numericValue.toLocaleString('es-VE', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
                                     break;
                                 default:
                                     formattedValue = displayData;
                             }
                         } else {
-                            formattedValue = displayData === null ? '' : String(displayData);
+                            formattedValue = displayData === null ?
+                                '' : String(displayData);
                         }
 
-                        // Contravalor Bs. (índice 7) y Fecha Jornada (índice 0) NO deben ser editables
-                        const isEditable = (colIndex !== fechaJornadaIndex && colIndex !== contravalorBsIndex) ? 'contenteditable="true"' : '';
+                        // Contravalor Bs.(índice 7) y Fecha Jornada(índice 0) NO deben ser editables
+                        const isEditable = (colIndex !== fechaJornadaIndex && colIndex !== contravalorBsIndex) ?
+                            'contenteditable="true"' : '';
                         tableHtml += `<td ${isEditable}>${formattedValue}</td>`;
                     });
                     tableHtml += '</tr>';
@@ -889,15 +1025,28 @@
                 const rows = editableExcelTable.find('tbody tr');
                 let anyRowVisible = false;
 
-                rows.each(function () {
-                    const rowText = $(this).text().toLowerCase();
-                    if (searchTerm === '' || rowText.includes(searchTerm)) {
-                        $(this).show();
-                        anyRowVisible = true;
-                    } else {
-                        $(this).hide();
-                    }
-                });
+                // >>> MODIFICADO: Lógica de filtrado para manejar la palabra clave "ERROR" <<<
+                if (searchTerm === 'error') {
+                    rows.each(function (index) {
+                        // `inconsistentRows` contiene los índices de las filas del `tbody`
+                        if (inconsistentRows.includes(index)) {
+                            $(this).show();
+                            anyRowVisible = true;
+                        } else {
+                            $(this).hide();
+                        }
+                    });
+                } else {
+                    rows.each(function () {
+                        const rowText = $(this).text().toLowerCase();
+                        if (searchTerm === '' || rowText.includes(searchTerm)) {
+                            $(this).show();
+                            anyRowVisible = true;
+                        } else {
+                            $(this).hide();
+                        }
+                    });
+                }
 
                 if (!anyRowVisible && searchTerm !== '') {
                     excelTableContainer.addClass('hidden');
@@ -911,9 +1060,13 @@
             }
 
             function updateSummaryMetrics() {
+                // >>> MODIFICADO: Reiniciar array de inconsistencias <<<
+                inconsistentRows = [];
                 // Reinicializar todas las sumas y contadores
-                let totalMontoUSD = 0; // Este ahora será el filtrado por tipo de pacto
-                let totalContravalorBs = 0; // Este ahora será el filtrado por tipo de pacto
+                let totalMontoUSD = 0;
+                // Este ahora será el filtrado por tipo de pacto
+                let totalContravalorBs = 0;
+                // Este ahora será el filtrado por tipo de pacto
                 let visibleRowsCount = 0;
                 let fechaValor = '--/--/----';
 
@@ -922,14 +1075,16 @@
 
                 let sumContravalorBsCompra = 0;
                 let sumMontoUSDCompra = 0;
-
                 let sumContravalorBsVenta = 0;
                 let sumMontoUSDVenta = 0;
 
                 // Índices de las columnas relevantes
                 const tipoPactoIndex = HTML_TABLE_AND_PACTO_HEADERS.indexOf("Tipo de Pacto");
                 const clienteOfertaIndex = HTML_TABLE_AND_PACTO_HEADERS.indexOf("Cliente"); // Primer "Cliente"
-                const clienteDemandaIndex = HTML_TABLE_AND_PACTO_HEADERS.lastIndexOf("Cliente"); // Último "Cliente"
+                const clienteDemandaIndex = HTML_TABLE_AND_PACTO_HEADERS.lastIndexOf("Cliente");
+                // Último "Cliente"
+                // >>> NUEVO: Índice para la columna "Instrumento" <<<
+                const instrumentoIndex = HTML_TABLE_AND_PACTO_HEADERS.indexOf("Instrumento");
 
                 const excludePactoTypes = ["CANJEE", "CANJET", "CANJE$", "CANJE€"];
                 const excludeClientName = "BANCO NACIONAL DE CREDITO";
@@ -938,22 +1093,37 @@
                     if ($(this).is(':visible')) {
                         visibleRowsCount++;
                         const rowIndexInCurrentTableData = $(this).index() + 1; // +1 porque currentTableData incluye cabeceras
+
+
                         const rowDataInTable = currentTableData[rowIndexInCurrentTableData];
 
                         if (visibleRowsCount === 1) {
                             fechaValor = rowDataInTable[fechaJornadaIndex] || '--/--/----';
+
+
                         }
 
                         const montoUSD = parseVenezuelanNumber(rowDataInTable[montoUSDIndex]);
                         const tipoCambio = parseVenezuelanNumber(rowDataInTable[tipoCambioBsUSDIndex]);
                         const contravalorBs = parseVenezuelanNumber(rowDataInTable[contravalorBsIndex]);
+
+
                         const tipoPacto = rowDataInTable[tipoPactoIndex];
                         const clienteOferta = rowDataInTable[clienteOfertaIndex];
                         const clienteDemanda = rowDataInTable[clienteDemandaIndex];
+                        // >>> NUEVO: Obtener el valor de Instrumento <<<
+                        const instrumento = rowDataInTable[instrumentoIndex];
+
+                        // >>> NUEVO: Lógica para detectar inconsistencias <<<
+                        if ((tipoPacto === 'CANJEE' && instrumento === 'EF') || (tipoPacto === 'CANJET' && instrumento === 'TR')) {
+                            inconsistentRows.push($(this).index()); // Guardar el índice de la fila `tr` en el `tbody`
+                        }
 
                         // Lógica para Tasa Mínima y Tasa Máxima (se mantiene sobre todos los visibles)
                         if (tipoCambio !== null) {
                             if (tipoCambio < tasaMinima) {
+
+
                                 tasaMinima = tipoCambio;
                             }
                             if (tipoCambio > tasaMaxima) {
@@ -987,41 +1157,39 @@
                         }
                     }
                 });
-
                 fechaValorDisplay.text(fechaValor);
                 // Monto Total USD y Contravalor Bs. ya están filtrados
                 totalMontoUSDSpan.text(totalMontoUSD.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-
-                // Calcular y mostrar Tasa de Compra
+                // AJUSTE: Truncar Tasa de Compra a 4 decimales
                 let tasaCompraCalculated = 0;
                 if (sumMontoUSDCompra > 0) {
-                    tasaCompraCalculated = sumContravalorBsCompra / sumMontoUSDCompra;
+                    const rawTasaCompra = sumContravalorBsCompra / sumMontoUSDCompra;
+                    tasaCompraCalculated = Math.trunc(rawTasaCompra * 10000) / 10000; // Truncado
                 }
                 tasaCompraDisplay.text(tasaCompraCalculated.toLocaleString('es-VE', { minimumFractionDigits: 4, maximumFractionDigits: 4 }));
-
                 if (tasaMinima === Infinity) {
                     tasaMinimaDisplay.text('0,0000');
                 } else {
                     tasaMinimaDisplay.text(tasaMinima.toLocaleString('es-VE', { minimumFractionDigits: 4, maximumFractionDigits: 4 }));
                 }
 
-                // Calcular y mostrar Tipo de Cambio Promedio (ahora basado en los totales filtrados)
+                // Calcular y mostrar Tipo de Cambio Promedio (ahora basado en los totales filtrados y TRUNCADO)
                 let tipoCambioPromedioCalculated = 0;
                 if (totalMontoUSD > 0) {
-                    tipoCambioPromedioCalculated = totalContravalorBs / totalMontoUSD;
+                    let rawTipoCambioPromedio = totalContravalorBs / totalMontoUSD;
+                    // Truncar a 4 decimales
+                    tipoCambioPromedioCalculated = Math.trunc(rawTipoCambioPromedio * 10000) / 10000;
                 }
                 tipoCambioPromedioDisplay.text(tipoCambioPromedioCalculated.toLocaleString('es-VE', { minimumFractionDigits: 4, maximumFractionDigits: 4 }));
-
                 // Contravalor Bs. ya está filtrado
                 totalContravalorBsDisplay.text(totalContravalorBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-
-                // Calcular y mostrar Tasa de Venta
+                // AJUSTE: Truncar Tasa de Venta a 4 decimales
                 let tasaVentaCalculated = 0;
                 if (sumMontoUSDVenta > 0) {
-                    tasaVentaCalculated = sumContravalorBsVenta / sumMontoUSDVenta;
+                    const rawTasaVenta = sumContravalorBsVenta / sumMontoUSDVenta;
+                    tasaVentaCalculated = Math.trunc(rawTasaVenta * 10000) / 10000; // Truncado
                 }
                 tasaVentaDisplay.text(tasaVentaCalculated.toLocaleString('es-VE', { minimumFractionDigits: 4, maximumFractionDigits: 4 }));
-
                 if (tasaMaxima === -Infinity) {
                     tasaMaximaDisplay.text('0,0000');
                 } else {
@@ -1029,7 +1197,6 @@
                 }
 
                 visibleRowCountSpan.text(visibleRowsCount);
-
                 if (visibleRowsCount > 0 && currentTableData.length > 1) {
                     excelTableContainer.removeClass('hidden');
                     footerControls.removeClass('hidden');
@@ -1037,10 +1204,16 @@
                     excelTableContainer.addClass('hidden');
                     footerControls.addClass('hidden');
                 }
+
+                // >>> NUEVO: Mostrar u ocultar el mensaje de inconsistencia <<<
+                if (inconsistentRows.length > 0) {
+                    inconsistencyWarning.text(`Inconsistencias Instrumento/Pacto: ${inconsistentRows.length}`).removeClass('hidden');
+                } else {
+                    inconsistencyWarning.addClass('hidden');
+                }
             }
 
             searchInput.on('keyup', filterTable);
-
             editableExcelTable.on('click', '.delete-row-btn', function () {
                 const tr = $(this).closest('tr');
                 const rowIndexInHtml = tr.index();
@@ -1048,17 +1221,21 @@
                 tr.remove();
                 updateSummaryMetrics();
 
+
+
                 if (currentTableData.length <= 1) {
                     excelTableContainer.addClass('hidden');
                     footerControls.addClass('hidden');
                 }
             });
-
             $(document).on('blur', 'td[contenteditable="true"]', function () {
                 const cell = $(this);
                 const colIndex = cell.index() - 1; // -1 porque la primera columna es el botón de eliminar
                 const row = cell.closest('tr');
-                const rowIndex = row.index() + 1; // +1 porque currentTableData incluye las cabeceras en el índice 0
+                const rowIndex = row.index() + 1; // +1 porque currentTableData 
+
+
+                // incluye las cabeceras en el índice 0
 
                 let oldValue = currentTableData[rowIndex][colIndex];
                 let newValueRaw = cell.text();
@@ -1070,24 +1247,32 @@
                     HTML_TABLE_AND_PACTO_HEADERS.indexOf("Monto Divisa"),
                     HTML_TABLE_AND_PACTO_HEADERS.indexOf("Monto USD"),
                     HTML_TABLE_AND_PACTO_HEADERS.indexOf("Tipo de Cambio Bs./USD"),
-                    // HTML_TABLE_AND_PACTO_HEADERS.indexOf("Contravalor Bs.") no se incluye aquí porque es solo de salida
-                ];
 
+
+                    // HTML_TABLE_AND_PACTO_HEADERS.indexOf("Contravalor Bs.") no se incluye 
+                    // aquí porque es solo de salida
+                ];
                 if (numFormatCols.includes(colIndex)) {
                     newValue = parseVenezuelanNumber(newValueRaw);
                     if (newValue !== null) {
                         // Aplicar formato de visualización a la celda
                         if (colIndex === HTML_TABLE_AND_PACTO_HEADERS.indexOf("Tipo de Cambio Bs./USD")) {
-                            cell.text(newValue.toLocaleString('es-VE', { minimumFractionDigits: 4, maximumFractionDigits: 4 }));
+                            cell.text(newValue.toLocaleString('es-VE', {
+
+                                minimumFractionDigits: 4, maximumFractionDigits: 4
+                            }));
                         } else {
                             cell.text(newValue.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
                         }
                     } else {
-                        cell.text(''); // Limpiar si no es un número válido
+                        cell.text('');
+                        // Limpiar si no es un número válido
                     }
                 } else if (colIndex === HTML_TABLE_AND_PACTO_HEADERS.indexOf("Fecha Pacto")) {
                     if (newValueRaw.trim() === '') {
-                        newValue = '';
+                        newValue =
+
+                            '';
                     } else if (!/^\d{4}-\d{2}-\d{2}$/.test(newValueRaw)) {
                         alert('Formato de fecha incorrecto. Use YYYY-MM-DD.');
                         newValue = oldValue; // Revertir al valor anterior
@@ -1097,15 +1282,16 @@
                     }
                 }
                 else if (colIndex === HTML_TABLE_AND_PACTO_HEADERS.indexOf("Hora Pacto")) {
-                    newValue = newValueRaw.trim(); // Simplemente toma el texto tal cual
+                    newValue = newValueRaw.trim();
+                    // Simplemente toma el texto tal cual
                 }
                 else {
-                    newValue = newValueRaw.trim(); // Para texto general
+                    newValue = newValueRaw.trim();
+                    // Para texto general
                 }
 
                 if (currentTableData[rowIndex][colIndex] !== newValue) {
                     currentTableData[rowIndex][colIndex] = newValue;
-
                     // Recalcular Contravalor Bs. si se modifica Monto USD o Tipo de Cambio
                     if (colIndex === montoUSDIndex || colIndex === tipoCambioBsUSDIndex) {
                         const montoUSD = parseVenezuelanNumber(currentTableData[rowIndex][montoUSDIndex]);
@@ -1116,7 +1302,6 @@
                             contravalorCalculado = parseFloat((montoUSD * tipoCambio).toFixed(2));
                         }
                         currentTableData[rowIndex][contravalorBsIndex] = contravalorCalculado;
-
                         const contravalorCell = row.find('td').eq(contravalorBsIndex + 1); // +1 por la columna del botón
                         if (contravalorCalculado !== null) {
                             contravalorCell.text(contravalorCalculado.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
@@ -1128,19 +1313,39 @@
                 }
             });
 
+            // >>> NUEVO: Evento click para filtrar por inconsistencias <<<
+            inconsistencyWarning.on('click', function () {
+                searchInput.val('ERROR');
+                filterTable();
+            });
+
             $('#exportModifiedExcel').on('click', function () {
-                const fileName = "reporte_mesa_de_cambio.xlsx";
+                // AJUSTE: Generar nombre de archivo dinámico con fecha actual en formato ddmmaaaa.
+                const today = new Date();
+                const day = String(today.getDate()).padStart(2, '0');
+                const month = String(today.getMonth() + 1).padStart(2, '0'); // Enero es 0, por eso se suma 1.
+                const year = today.getFullYear();
+                const fileName = `Formato modelo para la transmisión de información BNC ${day}${month}${year}.xlsx`;
+
 
                 const wb = XLSX.utils.book_new();
 
                 // ----------------------------------------------------
+
                 // HOJA: Pacto
                 // ----------------------------------------------------
+                // COMENTARIO: Se prepara la data para la hoja "Pacto", incluyendo los datos de la tabla visible.
+
                 const pactoHeadersRow2 = HTML_TABLE_AND_PACTO_HEADERS;
                 const pactoData = [];
-
                 const pactoHeadersRow1 = [];
-                pactoHeadersRow1[0] = { v: "Datos del Pacto", s: { font: { sz: 10, bold: true, color: { rgb: "FFFFFFFF" } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: "FF16365C" } }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } } };
+                pactoHeadersRow1[0] = {
+                    v: "Datos del Pacto", s: {
+                        font: { sz: 10, bold: true, color: { rgb: "FFFFFFFF" } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: "FF16365C" } },
+
+                        border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }
+                    }
+                };
                 pactoHeadersRow1[10] = { v: "Datos de la Oferta", s: { font: { sz: 10, bold: true, color: { rgb: "FFFFFFFF" } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: "FF366092" } }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } } };
                 pactoHeadersRow1[17] = { v: "Datos de la Demanda", s: { font: { sz: 10, bold: true, color: { rgb: "FFFFFFFF" } }, alignment: { horizontal: 'center' }, fill: { fgColor: { rgb: "FF538DD5" } }, border: { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } } } };
                 pactoData.push(pactoHeadersRow1);
@@ -1155,17 +1360,26 @@
 
                         let exportValue = cellValue;
                         let cellType = 's';
+
+
                         let cellFormat = '@';
 
                         if (colIndex === 4 || colIndex === 5 || colIndex === 6 || colIndex === 7) {
                             let parsedValue = parseVenezuelanNumber(cellValue);
+
+
                             if (parsedValue !== null) {
                                 exportValue = parsedValue;
                                 cellType = 'n';
+
+
                                 if (colIndex === 6) { // Tipo de Cambio Bs./USD
                                     cellFormat = '0.0000';
-                                } else if (colIndex === 7) { // Contravalor Bs.
+                                } else if
+
+                                    (colIndex === 7) { // Contravalor Bs.
                                     exportValue = parseFloat(parsedValue.toFixed(2));
+
                                     cellFormat = '#,##0.00';
                                 } else { // Monto Divisa, Monto USD
                                     cellFormat = '#,##0.00';
@@ -1176,6 +1390,8 @@
                         }
                         else if (colHeader === "Fecha Jornada" || colHeader === "Fecha Pacto") {
                             if (typeof cellValue === 'string' && cellValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
+
+
                                 exportValue = cellValue;
                                 cellType = 's';
                             } else {
@@ -1184,9 +1400,12 @@
                             }
                         }
                         else if (colHeader === "Hora Pacto") {
-                            exportValue = String(cellValue || ''); // Exporta la hora como string
-                            cellType = 's'; // Tipo de celda: string
-                            cellFormat = '@'; // Formato de texto general
+                            exportValue = String(cellValue || '');
+                            // Exporta la hora como string
+                            cellType = 's';
+                            // Tipo de celda: string
+                            cellFormat = '@';
+                            // Formato de texto general
                         }
                         else if (colHeader.includes("RIF/CI") || colHeader.includes("Cuenta Moneda Nacional") || colHeader.includes("Cuenta Moneda Extranjera")) {
                             exportValue = String(cellValue || '');
@@ -1203,30 +1422,37 @@
                 }
 
                 const wsPacto = XLSX.utils.aoa_to_sheet(pactoData);
-
                 wsPacto['!merges'] = [
                     { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } },
                     { s: { r: 0, c: 10 }, e: { r: 0, c: 16 } },
-                    { s: { r: 0, c: 17 }, e: { r: 0, c: 21 } }
-                ];
+                    {
 
+                        s: { r: 0, c: 17 },
+                        e: { r: 0, c: 21 }
+                    }
+                ];
                 const borderThin = {
                     top: { style: "thin", color: { auto: 1 } },
                     bottom: { style: "thin", color: { auto: 1 } },
                     left: { style: "thin", color: { auto: 1 } },
+
+
                     right: { style: "thin", color: { auto: 1 } }
                 };
-
                 const styleHeaderRow2 = {
                     font: { sz: 10 },
                     alignment: { horizontal: "center", vertical: "center", wrapText: true },
                     border: borderThin,
-                    fill: { fgColor: { rgb: "FFD9D9D9" } }
-                };
+                    fill: {
 
+                        fgColor: {
+                            rgb: "FFD9D9D9"
+                        }
+                    }
+
+                };
                 const styleDataText = { font: { sz: 11 }, alignment: { vertical: "center" } };
                 const styleDataNumber = { font: { sz: 11 }, alignment: { horizontal: "right", vertical: "center" } };
-
                 const range = XLSX.utils.decode_range(wsPacto['!ref']);
                 for (let R = range.s.r; R <= range.e.r; ++R) {
                     for (let C = range.s.c; C <= range.e.c; ++C) {
@@ -1234,25 +1460,40 @@
                         if (!wsPacto[cellRef]) wsPacto[cellRef] = {};
 
                         if (R === 0) {
-                            // Estilo ya aplicado en la creación de pactoHeadersRow1
+                            // Estilo ya aplicado en la creación de pactoHeadersRow1 (incluye bordes)
                         } else if (R === 1) {
-                            wsPacto[cellRef].s = styleHeaderRow2;
-                        } else {
+
+
+                            wsPacto[cellRef].s = styleHeaderRow2; // Incluye bordes
+                        } else { // Para R >= 2 (filas de datos)
                             let currentCell = wsPacto[cellRef];
+                            let cellStyle; // COMENTARIO: Se crea un objeto de estilo base para la celda.
                             if (currentCell.t === 'n') {
-                                currentCell.s = { ...styleDataNumber, numFmt: currentCell.z };
+                                cellStyle = { ...styleDataNumber, numFmt: currentCell.z };
                             } else {
-                                currentCell.s = { ...styleDataText, numFmt: currentCell.z };
+                                cellStyle = { ...styleDataText, numFmt: currentCell.z };
                             }
-                            currentCell.s.border = borderThin; // Aplicar borde a todas las celdas de datos
+
+                            // AJUSTE: Centrar la columna "Código Moneda Divisa" (índice 3).
+                            if (C === 3) {
+                                cellStyle.alignment = { ...cellStyle.alignment, horizontal: "center" };
+                            }
+
+                            currentCell.s = cellStyle;
+                            // NO aplicar bordes a las celdas de datos:
+                            // currentCell.s.border = borderThin;
                         }
                     }
                 }
 
                 // Ajuste para que '!cols' tenga la longitud correcta (22 elementos para 22 columnas)
                 wsPacto['!cols'] = [
+
+
                     { wch: 15 }, { wch: 15 }, { wch: 10 }, { wch: 10 }, { wch: 15 }, { wch: 15 }, { wch: 18 }, { wch: 18 }, { wch: 12 }, { wch: 15 }, // 0-9
                     { wch: 15 }, { wch: 30 }, { wch: 15 }, { wch: 30 }, { wch: 25 }, { wch: 30 }, // 10-15
+
+
                     { wch: 15 }, { wch: 30 }, { wch: 15 }, { wch: 30 }, { wch: 25 }, { wch: 30 }  // 16-21 (total 22 columnas)
                 ];
                 XLSX.utils.book_append_sheet(wb, wsPacto, "Pacto");
@@ -1261,30 +1502,37 @@
                 // ----------------------------------------------------
                 // HOJA: Descripción
                 // ----------------------------------------------------
+                // COMENTARIO: Se define el contenido estático para la hoja de descripción. Los saltos de línea han sido eliminados.
                 const descripcionContent = [
                     ["Descripción"],
                     ["Día hábil en el que se notifica al BCV las operaciones de compra y venta de moneda extranjera, el cual debe tener el formatoYYYY-MM-DD (Ejemplo: 2021-11-23)"],
-                    ["Día hábil en el que se efectuó el pacto, el cual debe tener el formatoYYYY-MM-DD (Ejemplo: 2019-05-10)"],
+                    ["Día hábil en el que se efectuó el pacto, el cual debe tener el formatoYYYY - MM - DD(Ejemplo: 2019-05 - 10)"],
                     ["Hora del día hábil en el que se efectuó el pacto, la cual debe tener el formato 24 horas HH:MM:SS (Ejemplo: 15:30:15)"],
                     ["Código ISO de la moneda de la transacción. (Ejemplo: 840 USD / 978 EUR)."],
+
                     ["Monto del pacto en Divisa, entero con 2 decimales."],
                     ["Monto del pacto en USD, entero con 2 decimales."],
                     ["Tipo de cambio Bs./USD correspondiente al pacto, entero con 4 decimales."],
                     ["Contravalor en Bolívares, entero con 2 decimales."],
+
                     ["Instrumento financiero mediante el cual se realiza la operación (EF: Efectivo, TR:Transferencia, CH:Cheque)."],
                     ["Código alfabético que describe el tipo de pacto:"],
                     ["OCACLI: Operación de venta por parte de un operador cambiario (OCA) a un cliente."],
+
                     ["CLIOCA: Operación de compra por parte de un OCA a un cliente."],
                     ["CPEOCA: Operación de venta de un cliente a un operador cambiario, cuyo origen de las divisas provienen de sus saldos mantenidos en cuentas en monedas extranjeras abiertas en el Sistema Financiero Nacional, y vendidas a través de las Mesas de Cambio, utilizando canales y nuevos productos autorizados por la SUDEBAN."],
+
                     ["OCACPE: Operación de venta de un operador cambiario a un cliente a través de las Mesas de Cambio, utilizando canales y nuevos productos autorizados por la SUDEBAN."],
                     ["EBMCLI: Operación de venta de un operador cambiario, cuyo origen de las divisas proviene de la desacumulación de divisas Sistema de Bajo Valor (Menudeo) a un cliente."],
+
                     ["PPOCLI: Operación de venta de un operador cambiario a un cliente, cuyo origen de las divisas proviene de la posición propia de la Institución Financiera."],
                     ["OPCCLI: Operación de venta de un operador cambiario a un cliente, cuyo origen de las divisas proviene de una porción (hasta un máximo equivalente al diez por ciento (10%)) de la captación de fondos en moneda extranjera, de la Institución Financiera."],
+
                     ["IGTCLI: Operación de venta de un operador cambiario a un cliente, cuyo origen de las divisas proviene del cobro del impuesto a las grandes transacciones financieras."],
                     ["MCLCLI: Operación de venta de un operador cambiario a un cliente, cuyo origen de las divisas proviene del Sistema de Bajo Valor producto de la comercialización de combustible líquido."],
                     ["CCLOCA: Operación de venta de un cliente Casa de Cambio, cuyo origen de las divisas proviene de la comercialización de combustible líquido."],
                     ["CCMOCA: Operación de venta de un cliente Casa de Cambio, cuyo origen de las divisas proviene del Sistema de Bajo Valor (Menudeo) a un OCA."],
-                    ["OCMCLI: Operación de venta de un operador cambiario, cuyo origen de las divisas proviene del Sistema de Bajo Valor (Menudeo) a un cliente."],
+                    ["OCMCLI: Operación de venta de un operador cambiario, cuyo origen de las divisas proviene del Sistema de Bajo Valor(Menudeo) a un cliente."],
                     ["ECMOCA: Operación de venta de un cliente Casa de Cambio, cuyo origen de las divisas proviene de la desacumulación de divisas del Sistema de Bajo Valor (Menudeo) a un OCA."],
                     ["CLICLI: Cruce directo entre clientes."],
                     ["OCAOCA: Operación Interbancaria."],
@@ -1294,12 +1542,15 @@
                     ["CANJET: Operación de canje de divisas a través de su mesa de cambio con el mismo instrumento, con moneda Transferencia por Instrumento Efectivo, donde el cliente oferente y el cliente demandante es la misma persona."],
                     ["CANJE$: Operación de canje de divisas a través de su mesa de cambio con el mismo instrumento, con moneda Dólar por moneda Euro, donde el cliente oferente y el cliente demandante es la misma persona."],
                     ["CANJE€: Operación de canje de divisas a través de su mesa de cambio con el mismo instrumento, con moneda Euro por moneda Dólar, donde el cliente oferente y el cliente demandante es la misma persona."],
+
                     ["CHECLI: Operación de venta de un operador cambiario a un cliente, cuyo origen de las divisas proviene de las ventas efectuadas por Chevron Global Technology Services Company."],
                     ["Código asignado por la SUDEBAN que consta de 3 caracteres de longitud."],
                     ["Nombre del operador cambiario."],
-                    ["Registro de Información Fiscal (RIF), Cédula de Identidad (V,E) o Pasaporte (P), que identifique el cliente, con el siguiente formato: para el caso de los códigos de identificación \"J\" admitiendo un máximo 9 digitos; y para los clientes con \"V\" o \"E\", admitiendo un máximo de 8 dígitos; y ara el caso de pasaportes, comenzando con el código de identificación \"P\" sin limitación alfanumérica. Ejemplo: J123456789; V12345678; E12345678; P123789456789456789. Completar con ceros a la izquierda luego del caracter alfabético y no colocar puntos ni guiones o caracteres especiales."],
+
+                    ["Registro de Información Fiscal (RIF), Cédula de Identidad (V,E) o Pasaporte (P), que identifique el cliente, con el siguiente formato: para el caso de los códigos de identificación \"J\" admitiendo un máximo 9 digitos; y para los clientes con \"V\" o \"E\", admitiendo un máximo de 8 dígitos; y ara el caso de pasaportes, comenzando con el código de identificación \"P\" sin limitación alfanumérica. Ejemplo: J123456789; V12345678; E12345678; P123789456789456789.Completar con ceros a la izquierda luego del caracter alfabético y no colocar puntos ni guiones o caracteres especiales."],
                     ["Nombre o razón social del cliente oferente."],
                     ["Código numérico de 20 dígitos de la cuenta en moneda nacional que mantiene el cliente oferente en la Institución Financiera."],
+
                     ["Código numérico de la cuenta en moneda extranjera del cliente oferente."]
                 ];
 
@@ -1307,47 +1558,55 @@
 
                 const borderAllThin = {
                     top: { style: "thin", color: { auto: 1 } },
+
                     bottom: { style: "thin", color: { auto: 1 } },
                     left: { style: "thin", color: { auto: 1 } },
                     right: { style: "thin", color: { auto: 1 } }
+
                 };
+
 
                 const rangeDesc = XLSX.utils.decode_range(wsDescripcion['!ref']);
 
-                for (let R = rangeDesc.s.r; R <= rangeDesc.e.r; ++R) {
+                // AJUSTE: Se reestructura el bucle de estilos para la hoja "Descripción" para aplicar los bordes solicitados.
+                for (let R = rangeDesc.s.r;
+                    R <= rangeDesc.e.r; ++R) {
                     for (let C = rangeDesc.s.c; C <= rangeDesc.s.c; ++C) {
                         const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
                         if (!wsDescripcion[cellRef]) wsDescripcion[cellRef] = { v: undefined, t: 's' };
-
+                        // COMENTARIO: Se define un estilo base para cada celda y se modifica según la fila.
                         let currentCellStyle = {
-                            font: { sz: 11 },
+                            font: { sz: 11, bold: false },
                             alignment: { vertical: "top", wrapText: false },
+                            // Se inicia sin bordes; se añaden condicionalmente.
                             border: {
                                 top: { style: "none" }, bottom: { style: "none" },
                                 left: { style: "none" }, right: { style: "none" }
+
                             }
                         };
-
-                        if (R === 0 || R === 10) {
+                        // Estilos de fuente y alineación
+                        if (R === 0) { // Título
+                            currentCellStyle.font.bold = true;
+                            currentCellStyle.alignment.horizontal = "center";
+                        } else if (R === 10) { // "Código alfabético..." (Fila 11)
                             currentCellStyle.font.bold = true;
                         }
 
-                        if (R === 0) {
-                            currentCellStyle.alignment.horizontal = "center";
-                        }
-
-                        if (C === 0) {
-                            if (R === 0 || R === 10) {
-                                currentCellStyle.border = borderAllThin;
-                            } else {
-                                currentCellStyle.border.left = borderAllThin.left;
-                                currentCellStyle.border.right = borderAllThin.right;
-                                if (R === rangeDesc.s.r + 1) {
-                                    currentCellStyle.border.top = borderAllThin.top;
-                                }
-                                if (R === rangeDesc.e.r) {
-                                    currentCellStyle.border.bottom = borderAllThin.bottom;
-                                }
+                        // Lógica de bordes
+                        if (R === 0 || R === 32) { // Título (R=0) y línea 33 "CHECLI" (R=32)
+                            currentCellStyle.border = borderAllThin;
+                        } else if (R === 10) { // Línea 11 "Código alfabético..." (R=10)
+                            // Se aplica solo el borde derecho, como fue solicitado.
+                            currentCellStyle.border.right = borderAllThin.right;
+                        } else { // Para todas las demás filas, se crea el contorno del recuadro.
+                            currentCellStyle.border.left = borderAllThin.left;
+                            currentCellStyle.border.right = borderAllThin.right;
+                            if (R === 1) { // La primera fila de datos tiene borde superior.
+                                currentCellStyle.border.top = borderAllThin.top;
+                            }
+                            if (R === rangeDesc.e.r) { // La última fila de datos tiene borde inferior.
+                                currentCellStyle.border.bottom = borderAllThin.bottom;
                             }
                         }
 
@@ -1356,7 +1615,6 @@
                 }
 
                 wsDescripcion['!cols'] = [{ wch: 200 }];
-
                 wsDescripcion['!sheet'] = {
                     'SheetPr': {
                         'TabColor': { 'rgb': "FF808080" }
@@ -1368,16 +1626,16 @@
                 // ----------------------------------------------------
                 // HOJA: Oferta (No pactada)
                 // ----------------------------------------------------
+                // COMENTARIO: Se prepara la data para la hoja "Oferta (No pactada)".
                 const ofertaNoPactadaRawData = [];
-                let hasOfertaData = false;
-
+                let hasOfertaData = false; // COMENTARIO: Flag para saber si se encontraron datos de oferta.
                 // Añadir títulos y encabezados como arrays simples para aoa_to_sheet
                 const ofertaTitleRow_simple = [];
                 ofertaTitleRow_simple[0] = "Oferta (No Pactada)";
                 ofertaNoPactadaRawData.push(ofertaTitleRow_simple);
                 ofertaNoPactadaRawData.push(NO_PACTADAS_OUTPUT_HEADERS); // Solo los nombres de los encabezados
 
-                // Procesar datos de ofertaWorkbookData si está cargado
+                // COMENTARIO: Procesar datos de ofertaWorkbookData solo si el archivo fue cargado.
                 if (ofertaWorkbookData) {
                     const firstSheetNameNoPactadas = ofertaWorkbookData.SheetNames[0];
                     const worksheetNoPactadas = ofertaWorkbookData.Sheets[firstSheetNameNoPactadas];
@@ -1385,33 +1643,37 @@
                     if (worksheetNoPactadas && worksheetNoPactadas['!ref']) {
                         const rawNoPactadasData = XLSX.utils.sheet_to_json(worksheetNoPactadas, {
                             header: 1, // Obtener como array de arrays
-                            range: 1,  // Empezar a leer desde la fila 2 (índice 1 en 0-based)
+                            range:
+                                1,  // Empezar a leer desde la fila 2 (índice 1 en 0-based)
                             defval: "",
                             raw: false,
-                            dateNF: 'yyyy-mm-dd HH:mm:ss'
+                            dateNF:
+                                'yyyy-mm-dd HH:mm:ss'
                         });
-
                         const inputHeadersNoPactadas = XLSX.utils.sheet_to_json(worksheetNoPactadas, { header: 1, range: 0, defval: "", raw: false })[0];
                         const inputHeaderMap = {};
                         inputHeadersNoPactadas.forEach((header, index) => {
                             inputHeaderMap[header] = index;
                         });
-
                         const today = new Date();
                         const todayFormatted = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-
                         rawNoPactadasData.forEach(row => {
                             const operationType = String(row[inputHeaderMap["OperationType"]] || '').trim(); // Asegurarse que es string y trim
 
                             if (operationType === "OFERTA") {
-                                hasOfertaData = true;
+
+                                hasOfertaData = true; // COMENTARIO: Se encontró al menos una fila de oferta.
+
                                 const newRow = new Array(NO_PACTADAS_OUTPUT_HEADERS.length).fill(null);
 
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Fecha Jornada")] = todayFormatted;
+
                                 const pactDate = String(row[inputHeaderMap["PactDate"]] || '');
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Fecha Registro")] = pactDate.substring(0, 10);
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Hora Registro")] = pactDate.substring(11, 19);
-                                newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Código Moneda Divisa")] = String(row[inputHeaderMap["CurrencyCode"]] || '');
+
+                                newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Código Moneda Divisa")] = String(row[inputHeaderMap["CurrencyCode"]] ||
+                                    '');
 
                                 let montoDivisa = parseVenezuelanNumber(row[inputHeaderMap["CurrencyAmount"]]);
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Monto Divisa")] = montoDivisa !== null ? montoDivisa : '';
@@ -1426,7 +1688,8 @@
                                 if (montoUSD !== null && tipoCambio !== null) {
                                     contravalorBs = parseFloat((montoUSD * tipoCambio).toFixed(2));
                                 }
-                                newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Contravalor Bs.")] = contravalorBs !== null ? contravalorBs : '';
+                                newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Contravalor Bs.")] = contravalorBs !== null ?
+                                    contravalorBs : '';
 
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Instrumento")] = String(row[inputHeaderMap["InstrumentType"]] || '');
 
@@ -1437,29 +1700,33 @@
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Cuenta Moneda Nacional")] = String(row[inputHeaderMap["Offer_Account_VES"]] || '');
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Cuenta Moneda Extranjera (Opcional)")] = String(row[inputHeaderMap["Offer_Account_Currency"]] || '');
 
+                                // AJUSTE: Validación para RIF/CI en hoja de Oferta (No Pactada) antes de añadir la fila.
+                                if (newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("RIF/CI")] === 'J085371427') {
+                                    newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Cliente")] = 'CASA DE CAMBIO ZOOM C.A.';
+                                }
+
                                 ofertaNoPactadaRawData.push(newRow);
                             }
                         });
                     }
                 }
 
+                // >>> MODIFICADO: Si no hay datos, se crea una fila de ceros de A3 a O3 <<<
                 if (!hasOfertaData) {
-                    const emptyRow = new Array(NO_PACTADAS_OUTPUT_HEADERS.length).fill(null);
-                    emptyRow[0] = "0"; // Solo el valor, el estilo se aplicará después
+                    const emptyRow = new Array(NO_PACTADAS_OUTPUT_HEADERS.length).fill("0");
                     ofertaNoPactadaRawData.push(emptyRow);
                 }
 
                 const wsOferta = XLSX.utils.aoa_to_sheet(ofertaNoPactadaRawData);
-
                 // Aplicar estilos a la hoja de Oferta
                 const ofertaRange = XLSX.utils.decode_range(wsOferta['!ref']);
-
                 // Estilo para la Fila 1 (Título)
                 const styleOfertaTitle = {
                     font: { sz: 10, bold: true, color: { rgb: "FFFFFFFF" } },
                     alignment: { horizontal: 'center', vertical: 'center' },
+
                     fill: { fgColor: { rgb: "FF366092" } },
-                    border: borderThin
+                    border: borderThin // Mantenemos borde para el título
                 };
                 const cellRefTitleOferta = XLSX.utils.encode_cell({ r: 0, c: 0 });
                 if (wsOferta[cellRefTitleOferta]) {
@@ -1472,8 +1739,9 @@
                 const styleOfertaHeader = {
                     font: { sz: 10 },
                     alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+
                     fill: { fgColor: { rgb: "FFD9D9D9" } },
-                    border: borderThin
+                    border: borderThin // Mantenemos borde para los encabezados
                 };
                 for (let C = 0; C < NO_PACTADAS_OUTPUT_HEADERS.length; ++C) {
                     const cellRef = XLSX.utils.encode_cell({ r: 1, c: C });
@@ -1481,10 +1749,9 @@
                     wsOferta[cellRef].s = styleOfertaHeader;
                 }
 
-                // Estilos para las filas de datos (a partir de la fila 3)
-                const ofertaDataTextStyle = { font: { sz: 11 }, alignment: { vertical: "center", horizontal: "left" }, border: borderThin };
-                const ofertaDataNumberStyle = { font: { sz: 11 }, alignment: { vertical: "center", horizontal: "right" }, border: borderThin };
-
+                // Estilos para las filas de datos (a partir de la fila 3) - SIN BORDES
+                const ofertaDataTextStyle = { font: { sz: 11 }, alignment: { vertical: "center", horizontal: "left" } /* , border: borderThin */ };
+                const ofertaDataNumberStyle = { font: { sz: 11 }, alignment: { vertical: "center", horizontal: "right" } /* , border: borderThin */ };
                 for (let R = 2; R <= ofertaRange.e.r; ++R) { // Empieza desde la fila 2 (índice 2)
                     for (let C = 0; C <= ofertaRange.e.c; ++C) {
                         const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
@@ -1492,15 +1759,20 @@
 
                         let currentCell = wsOferta[cellRef];
 
+                        // Determinar el estilo base de la celda.
+                        let cellStyle;
                         // Ajustar el tipo de celda y el formato numérico si es necesario
                         if (C === NO_PACTADAS_OUTPUT_HEADERS.indexOf("Monto Divisa") ||
                             C === NO_PACTADAS_OUTPUT_HEADERS.indexOf("Monto USD") ||
+
                             C === NO_PACTADAS_OUTPUT_HEADERS.indexOf("Contravalor Bs.")) {
+
                             currentCell.t = 'n';
                             currentCell.z = '#,##0.00';
-                            currentCell.s = { ...ofertaDataNumberStyle, numFmt: currentCell.z };
+                            cellStyle = { ...ofertaDataNumberStyle, numFmt: currentCell.z };
                             if (typeof currentCell.v !== 'number' && typeof currentCell.v !== 'string') {
-                                currentCell.v = ''; // Asegurar que sea vacío si no es un número/string
+                                currentCell.v = '';
+                                // Asegurar que sea vacío si no es un número/string
                             } else if (typeof currentCell.v === 'string') {
                                 const parsed = parseVenezuelanNumber(currentCell.v);
                                 currentCell.v = parsed !== null ? parsed : '';
@@ -1508,7 +1780,7 @@
                         } else if (C === NO_PACTADAS_OUTPUT_HEADERS.indexOf("Tipo de Cambio Bs./USD")) {
                             currentCell.t = 'n';
                             currentCell.z = '#,##0.0000';
-                            currentCell.s = { ...ofertaDataNumberStyle, numFmt: currentCell.z };
+                            cellStyle = { ...ofertaDataNumberStyle, numFmt: currentCell.z };
                             if (typeof currentCell.v !== 'number' && typeof currentCell.v !== 'string') {
                                 currentCell.v = '';
                             } else if (typeof currentCell.v === 'string') {
@@ -1518,22 +1790,36 @@
                         } else {
                             currentCell.t = 's';
                             currentCell.z = '@';
-                            currentCell.s = { ...ofertaDataTextStyle, numFmt: currentCell.z };
+                            cellStyle = { ...ofertaDataTextStyle, numFmt: currentCell.z };
                             if (currentCell.v === null || currentCell.v === undefined) {
                                 currentCell.v = '';
                             }
                         }
 
+                        // AJUSTE: Centrar la columna "Código Moneda Divisa".
+                        if (C === NO_PACTADAS_OUTPUT_HEADERS.indexOf("Código Moneda Divisa")) {
+                            cellStyle.alignment.horizontal = 'center';
+                        }
+
                         // Si la fila es la del "0" y no hay datos, aplicar estilo centrado al "0"
                         if (!hasOfertaData && R === 2 && C === 0) {
-                            currentCell.s.alignment.horizontal = 'center';
+
+                            cellStyle.alignment.horizontal = 'center';
+
                         }
+
+                        // >>> MODIFICADO: Centrar toda la fila de "0"s si no hay datos <<<
+                        if (!hasOfertaData && R === 2) {
+                            cellStyle.alignment.horizontal = 'center';
+                        }
+
+
+                        currentCell.s = cellStyle;
                     }
                 }
 
                 // Combinar celdas para el título
                 wsOferta['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: NO_PACTADAS_OUTPUT_HEADERS.length - 1 } }];
-
                 // Establecer anchos de columna
                 wsOferta['!cols'] = Array(NO_PACTADAS_OUTPUT_HEADERS.length).fill({ wch: 15 });
                 wsOferta['!cols'][NO_PACTADAS_OUTPUT_HEADERS.indexOf("Fecha Jornada")] = { wch: 15 };
@@ -1553,23 +1839,25 @@
                     'SheetPr': {
                         'TabColor': { 'rgb': "FFFFD700" } // Amarillo dorado para Oferta
                     }
+
                 };
+
                 XLSX.utils.book_append_sheet(wb, wsOferta, "Oferta (No pactada)");
 
 
                 // ----------------------------------------------------
                 // HOJA: Demanda (No pactada)
                 // ----------------------------------------------------
+                // COMENTARIO: Se prepara la data para la hoja "Demanda (No pactada)", con la misma lógica que la de Oferta.
                 const demandaNoPactadaRawData = [];
-                let hasDemandaData = false;
-
+                let hasDemandaData = false; // COMENTARIO: Flag para saber si se encontraron datos de demanda.
                 // Añadir títulos y encabezados como arrays simples para aoa_to_sheet
                 const demandaTitleRow_simple = [];
                 demandaTitleRow_simple[0] = "Demanda (No Pactada)";
                 demandaNoPactadaRawData.push(demandaTitleRow_simple);
                 demandaNoPactadaRawData.push(NO_PACTADAS_OUTPUT_HEADERS); // Solo los nombres de los encabezados
 
-                // Procesar datos de ofertaWorkbookData si está cargado
+                // COMENTARIO: Procesar datos de ofertaWorkbookData solo si el archivo fue cargado.
                 if (ofertaWorkbookData) {
                     const firstSheetNameNoPactadas = ofertaWorkbookData.SheetNames[0];
                     const worksheetNoPactadas = ofertaWorkbookData.Sheets[firstSheetNameNoPactadas];
@@ -1577,33 +1865,37 @@
                     if (worksheetNoPactadas && worksheetNoPactadas['!ref']) {
                         const rawNoPactadasData = XLSX.utils.sheet_to_json(worksheetNoPactadas, {
                             header: 1, // Obtener como array de arrays
-                            range: 1,  // Empezar a leer desde la fila 2 (índice 1 en 0-based)
+                            range:
+                                1,  // Empezar a leer desde la fila 2 (índice 1 en 0-based)
                             defval: "",
                             raw: false,
-                            dateNF: 'yyyy-mm-dd HH:mm:ss'
+                            dateNF:
+                                'yyyy-mm-dd HH:mm:ss'
                         });
-
                         const inputHeadersNoPactadas = XLSX.utils.sheet_to_json(worksheetNoPactadas, { header: 1, range: 0, defval: "", raw: false })[0];
                         const inputHeaderMap = {};
                         inputHeadersNoPactadas.forEach((header, index) => {
                             inputHeaderMap[header] = index;
                         });
-
                         const today = new Date();
                         const todayFormatted = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-
                         rawNoPactadasData.forEach(row => {
                             const operationType = String(row[inputHeaderMap["OperationType"]] || '').trim();
 
                             if (operationType === "DEMANDA") {
-                                hasDemandaData = true;
+                                hasDemandaData
+                                    = true; // COMENTARIO: Se encontró al menos una fila de demanda.
+
                                 const newRow = new Array(NO_PACTADAS_OUTPUT_HEADERS.length).fill(null);
 
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Fecha Jornada")] = todayFormatted;
+
                                 const pactDate = String(row[inputHeaderMap["PactDate"]] || '');
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Fecha Registro")] = pactDate.substring(0, 10);
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Hora Registro")] = pactDate.substring(11, 19);
-                                newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Código Moneda Divisa")] = String(row[inputHeaderMap["CurrencyCode"]] || '');
+
+                                newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Código Moneda Divisa")] = String(row[inputHeaderMap["CurrencyCode"]] ||
+                                    '');
 
                                 let montoDivisa = parseVenezuelanNumber(row[inputHeaderMap["CurrencyAmount"]]);
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Monto Divisa")] = montoDivisa !== null ? montoDivisa : '';
@@ -1618,7 +1910,8 @@
                                 if (montoUSD !== null && tipoCambio !== null) {
                                     contravalorBs = parseFloat((montoUSD * tipoCambio).toFixed(2));
                                 }
-                                newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Contravalor Bs.")] = contravalorBs !== null ? contravalorBs : '';
+                                newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Contravalor Bs.")] = contravalorBs !== null ?
+                                    contravalorBs : '';
 
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Instrumento")] = String(row[inputHeaderMap["InstrumentType"]] || '');
 
@@ -1629,29 +1922,33 @@
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Cuenta Moneda Nacional")] = String(row[inputHeaderMap["Demand_Account_VES"]] || '');
                                 newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Cuenta Moneda Extranjera (Opcional)")] = String(row[inputHeaderMap["Demand_Account_Currency"]] || '');
 
+                                // AJUSTE: Validación para RIF/CI en hoja de Demanda (No Pactada) antes de añadir la fila.
+                                if (newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("RIF/CI")] === 'J085371427') {
+                                    newRow[NO_PACTADAS_OUTPUT_HEADERS.indexOf("Cliente")] = 'CASA DE CAMBIO ZOOM C.A.';
+                                }
+
                                 demandaNoPactadaRawData.push(newRow);
                             }
                         });
                     }
                 }
 
+                // >>> MODIFICADO: Si no hay datos, se crea una fila de ceros de A3 a O3 <<<
                 if (!hasDemandaData) {
-                    const emptyRow = new Array(NO_PACTADAS_OUTPUT_HEADERS.length).fill(null);
-                    emptyRow[0] = "0"; // Solo el valor, el estilo se aplicará después
+                    const emptyRow = new Array(NO_PACTADAS_OUTPUT_HEADERS.length).fill("0");
                     demandaNoPactadaRawData.push(emptyRow);
                 }
 
                 const wsDemanda = XLSX.utils.aoa_to_sheet(demandaNoPactadaRawData);
-
                 // Aplicar estilos a la hoja de Demanda
                 const demandaRange = XLSX.utils.decode_range(wsDemanda['!ref']);
-
                 // Estilo para la Fila 1 (Título)
                 const styleDemandaTitle = {
                     font: { sz: 10, bold: true, color: { rgb: "FFFFFFFF" } },
                     alignment: { horizontal: 'center', vertical: 'center' },
+
                     fill: { fgColor: { rgb: "FF538DD5" } },
-                    border: borderThin
+                    border: borderThin // Mantenemos borde para el título
                 };
                 const cellRefTitleDemanda = XLSX.utils.encode_cell({ r: 0, c: 0 });
                 if (wsDemanda[cellRefTitleDemanda]) {
@@ -1664,8 +1961,9 @@
                 const styleDemandaHeader = {
                     font: { sz: 10 },
                     alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+
                     fill: { fgColor: { rgb: "FFD9D9D9" } },
-                    border: borderThin
+                    border: borderThin // Mantenemos borde para los encabezados
                 };
                 for (let C = 0; C < NO_PACTADAS_OUTPUT_HEADERS.length; ++C) {
                     const cellRef = XLSX.utils.encode_cell({ r: 1, c: C });
@@ -1673,24 +1971,25 @@
                     wsDemanda[cellRef].s = styleDemandaHeader;
                 }
 
-                // Estilos para las filas de datos (a partir de la fila 3)
-                const demandaDataTextStyle = { font: { sz: 11 }, alignment: { vertical: "center", horizontal: "left" }, border: borderThin };
-                const demandaDataNumberStyle = { font: { sz: 11 }, alignment: { vertical: "center", horizontal: "right" }, border: borderThin };
-
+                // Estilos para las filas de datos (a partir de la fila 3) - SIN BORDES
+                const demandaDataTextStyle = { font: { sz: 11 }, alignment: { vertical: "center", horizontal: "left" } /*, border: borderThin*/ };
+                const demandaDataNumberStyle = { font: { sz: 11 }, alignment: { vertical: "center", horizontal: "right" } /*, border: borderThin*/ };
                 for (let R = 2; R <= demandaRange.e.r; ++R) { // Empieza desde la fila 2 (índice 2)
                     for (let C = 0; C <= demandaRange.e.c; ++C) {
                         const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
                         if (!wsDemanda[cellRef]) wsDemanda[cellRef] = {};
 
                         let currentCell = wsDemanda[cellRef];
-
+                        let cellStyle;
                         // Ajustar el tipo de celda y el formato numérico si es necesario
                         if (C === NO_PACTADAS_OUTPUT_HEADERS.indexOf("Monto Divisa") ||
                             C === NO_PACTADAS_OUTPUT_HEADERS.indexOf("Monto USD") ||
+
                             C === NO_PACTADAS_OUTPUT_HEADERS.indexOf("Contravalor Bs.")) {
+
                             currentCell.t = 'n';
                             currentCell.z = '#,##0.00';
-                            currentCell.s = { ...demandaDataNumberStyle, numFmt: currentCell.z };
+                            cellStyle = { ...demandaDataNumberStyle, numFmt: currentCell.z };
                             if (typeof currentCell.v !== 'number' && typeof currentCell.v !== 'string') {
                                 currentCell.v = '';
                             } else if (typeof currentCell.v === 'string') {
@@ -1700,7 +1999,7 @@
                         } else if (C === NO_PACTADAS_OUTPUT_HEADERS.indexOf("Tipo de Cambio Bs./USD")) {
                             currentCell.t = 'n';
                             currentCell.z = '#,##0.0000';
-                            currentCell.s = { ...demandaDataNumberStyle, numFmt: currentCell.z };
+                            cellStyle = { ...demandaDataNumberStyle, numFmt: currentCell.z };
                             if (typeof currentCell.v !== 'number' && typeof currentCell.v !== 'string') {
                                 currentCell.v = '';
                             } else if (typeof currentCell.v === 'string') {
@@ -1710,22 +2009,29 @@
                         } else {
                             currentCell.t = 's';
                             currentCell.z = '@';
-                            currentCell.s = { ...demandaDataTextStyle, numFmt: currentCell.z };
+                            cellStyle = { ...demandaDataTextStyle, numFmt: currentCell.z };
                             if (currentCell.v === null || currentCell.v === undefined) {
                                 currentCell.v = '';
                             }
                         }
 
-                        // Si la fila es la del "0" y no hay datos, aplicar estilo centrado al "0"
-                        if (!hasDemandaData && R === 2 && C === 0) {
-                            currentCell.s.alignment.horizontal = 'center';
+                        // AJUSTE: Centrar la columna "Código Moneda Divisa".
+                        if (C === NO_PACTADAS_OUTPUT_HEADERS.indexOf("Código Moneda Divisa")) {
+                            cellStyle.alignment.horizontal = 'center';
                         }
+
+                        // >>> MODIFICADO: Centrar toda la fila de "0"s si no hay datos <<<
+                        if (!hasDemandaData && R === 2) {
+                            cellStyle.alignment.horizontal = 'center';
+                        }
+
+
+                        currentCell.s = cellStyle;
                     }
                 }
 
                 // Combinar celdas para el título
                 wsDemanda['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: NO_PACTADAS_OUTPUT_HEADERS.length - 1 } }];
-
                 // Establecer anchos de columna
                 wsDemanda['!cols'] = Array(NO_PACTADAS_OUTPUT_HEADERS.length).fill({ wch: 15 });
                 wsDemanda['!cols'][NO_PACTADAS_OUTPUT_HEADERS.indexOf("Fecha Jornada")] = { wch: 15 };
@@ -1745,7 +2051,9 @@
                     'SheetPr': {
                         'TabColor': { 'rgb': "FFADD8E6" } // Azul claro para Demanda
                     }
+
                 };
+
                 XLSX.utils.book_append_sheet(wb, wsDemanda, "Demanda (No pactada)");
 
                 XLSX.writeFile(wb, fileName);
